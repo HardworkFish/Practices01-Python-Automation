@@ -93,5 +93,66 @@ print('swap_memory：%s' % str(psutil.swap_memory()))
 
 """
 （3）磁盘信息
+在系统的所有磁盘信息中，更加关注磁盘的利用率及IO信息，其中磁盘利用率使用 psutil.disk_usage 方法获取。
+磁盘 IO 信息包括 read_count（读IO数）、write_count（写IO数）、read_bytes（IO读字节数）、write_bytes（IO写字节数）、read_time（磁盘读时间）、write_time（磁盘写时间）等。
+这些 IO 信息可以使用 psutil.disk_io_counters() 获取，具体见下面的操作例子。
 
 """
+
+print('disk_partitions: %s'%str(psutil.disk_partitions()))    #使用psutil.disk_partitions方法获取磁盘完整信息
+print('disk_usage: %s' % str(psutil.disk_usage('/'))) #使用psutil.disk_usage方法获取分区(参数)的使用情况
+print('disk_io_counters: %s' % str(psutil.disk_io_counters())) #使用psutil.disk_io_counters获取硬盘总的IO个数、读写信息
+print('disk_io_counters: %s'% str(psutil.disk_io_counters(perdisk=True))) # “perdisk=True”参数获取单个分区IO个数、读写信息
+
+"""
+(4)网络信息
+系统的网络信息与磁盘IO类似，涉及几个关键点，包括bytes_sent（发送字节数）、bytes_recv=28220119（接收字节数）、packets_sent=200978（发送数据包数）、packets_recv=212672（接收数据包数）等。
+这些网络信息使用 psutil.net_io_counters()方法获取，
+"""
+import datetime
+print('net_io_counters: %s' % str(psutil.net_io_counters()))  #使用psutil.net_io_counters获取网络总的IO信息，默认pernic=False
+print('each_net_io_counters: %s'% str(psutil.net_io_counters(pernic=True)))  #pernic=True输出每个网络接口的IO信息
+
+
+"""
+（5）其他系统信息
+除了前面介绍的几个获取系统基本信息的方法，psutil 模块还支持获取用户登录、开机时间等信息。
+"""
+print('users:%s' % str(psutil.users()))    #使用psutil.users方法返回当前登录系统的用户信息
+print('boot_time:%s' % str(psutil.boot_time()))    #使用psutil.boot_time方法获取开机时间，以Linux时间戳格式返回
+print('format_boot_time: %s'% (datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S"))) # 转换成自然时间格式
+
+
+"""
+1.1.2 系统进程管理方法
+
+获得当前系统的进程信息，可以得知应用程序的运行状态，包括进程的启动时间、查看或设置CPU亲和度、内存使用率、IO信息、socket连接、线程数等，
+这些信息可以呈现出指定进程是否存活、资源利用情况，为开发人员的代码优化、问题定位提供很好的数据参考。
+"""
+
+"""
+（1）进程信息
+psutil模块在获取进程信息方面也提供了很好的支持，包括使用psutil.pids()方法获取所有进程PID，
+使用psutil.Process()方法获取单个进程的名称、路径、状态、系统资源利用率等信息
+"""
+print('pids: %s' % str(psutil.pids()))#列出所有进程PID
+p = psutil.Process(476)  #实例化一个Process对象，参数为一进程PID
+print('pid_name: %s' % p.name())  #进程名
+print('pid_status: %s' % p.status()) #进程状态
+print('pid_create_time: %s' % p.create_time()) #进程创建时间
+print('pid_memory_percent: %s' % p.memory_percent()) #进程内存利用率
+print('pid_io_counters: %s' % str(p.io_counters())) #进程IO信息，包括读写IO数及字节数
+print('pid_num_threads: %d'% p.num_threads()) #进程开启线程数
+
+
+"""
+（2）popen类的使用
+psutil提供的popen类的作用是获取用户启动的应用程序进程信息，以便跟踪程序进程的运行状态。
+"""
+from subprocess import  PIPE
+
+#通过psutil的Popen方法启动的应用程序，可以跟踪该程序运行的所有相关信息
+p = psutil.Popen(["C:/Users/Micky/AppData/Local/Programs/Python/Python35/python", "-c", "print('hello')"], stdout=PIPE)
+print('p_name: %s' % p.name())
+print('p_username: %s' % p.username())
+print('p_cou_time: %s' % p.cpu_times)
